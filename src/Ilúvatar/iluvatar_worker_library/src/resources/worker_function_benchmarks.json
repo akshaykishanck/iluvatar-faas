@@ -1,0 +1,62 @@
+{
+    "onnx-roberta": {
+        "warm_execution_time": 0.19989713033040366,
+        "cold_execution_time": 0.9479318857192993
+    },
+    "rodinia-srad": {
+        "warm_execution_time": 2.5344974199930825,
+        "cold_execution_time": 2.682388961315155
+    },
+    "rodinia-pathfinder": {
+        "warm_execution_time": 0.3502849340438843,
+        "cold_execution_time": 0.49941784143447876
+    },
+    "squeezenet": {
+        "warm_execution_time": 1.8786529699961345,
+        "cold_execution_time": 5.953268527984619
+    },
+    "rodinia-myocyte": {
+        "warm_execution_time": 1.6755910118420918,
+        "cold_execution_time": 2.8004531860351562
+    },
+    "rodinia-lavamd": {
+        "warm_execution_time": 0.5981270472208658,
+        "cold_execution_time": 0.761830747127533
+    },
+    "rodinia-lud": {
+        "warm_execution_time": 0.7307238380114237,
+        "cold_execution_time": 0.9432665109634399
+    },
+    "imagenet": {
+        "warm_execution_time": 2.088790496190389,
+        "cold_execution_time": 4.2360116839408875
+    },
+    "ffmpeg": {
+        "warm_execution_time": 0.0,
+        "cold_execution_time": 0.0
+    },
+    "rodinia-gaussian": {
+        "warm_execution_time": 1.1747816999753316,
+        "cold_execution_time": 1.2928932309150696
+    },
+    "pyhpc-eos": {
+        "warm_execution_time": 0.005294402440388997,
+        "cold_execution_time": 3.526974380016327
+    },
+    "pyhpc-isoneural": {
+        "warm_execution_time": 0.013246039549509684,
+        "cold_execution_time": 7.898812711238861
+    },
+    "rodinia-needle": {
+        "warm_execution_time": 1.2705769936243694,
+        "cold_execution_time": 1.4225573539733887
+    },
+    "torch_rnn": {
+        "warm_execution_time": 0.03440213203430176,
+        "cold_execution_time": 2.7348687648773193
+    },
+    "cupy": {
+        "warm_execution_time": 0.8939536412556967,
+        "cold_exectution_time": 2.090824246406555
+    }
+}

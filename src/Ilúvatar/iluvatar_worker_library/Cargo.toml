@@ -43,6 +43,7 @@ bollard = "0.18"
 prost-types = "0.13"
 num_cpus = "1.16"
 async-trait = "0.1"
+ort = { version = "2.0.0-rc.12", features = ["download-binaries"] }
 
 [dev-dependencies]
 rstest = "0.25"
