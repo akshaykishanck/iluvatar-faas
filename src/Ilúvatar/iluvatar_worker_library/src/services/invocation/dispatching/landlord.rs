@@ -19,49 +19,6 @@ use std::sync::Arc;
 use time::OffsetDateTime;
 use tracing::info;
 
-#[derive(Debug, Deserialize)]
-struct BenchmarkEntry {
-    warm_execution_time: f64,
-    cold_execution_time: f64,
-}
-
-/// Loaded once at startup. Maps base-function name -> (warm_sec, cold_sec).
-#[derive(Debug, Clone)]
-pub struct FunctionBenchmarks {
-    inner: HashMap<String, (f64, f64)>,
-}
-
-impl FunctionBenchmarks {
-    pub fn load(json_path: &str) -> Self {
-        let raw = match std::fs::read_to_string(json_path) {
-            Ok(s) => s,
-            Err(e) => {
-                tracing::warn!(path = json_path, error = %e, "Could not read benchmark JSON; using empty table");
-                return Self { inner: HashMap::new() };
-            }
-        };
-        let parsed: HashMap<String, BenchmarkEntry> = match serde_json::from_str(&raw) {
-            Ok(m) => m,
-            Err(e) => {
-                tracing::warn!(error = %e, "Failed to parse benchmark JSON; using empty table");
-                return Self { inner: HashMap::new() };
-            }
-        };
-        let inner = parsed
-            .into_iter()
-            .map(|(k, v)| (k, (v.warm_execution_time, v.cold_execution_time)))
-            .collect();
-        Self { inner }
-    }
-
-    /// Strip numeric suffix + trailing `-` to get base function name, then look up.
-    pub fn get(&self, fqdn: &str) -> (f64, f64) {
-        let base: String = fqdn.chars().take_while(|c| !c.is_ascii_digit()).collect();
-        let base = base.trim_end_matches('-');
-        self.inner.get(base).cloned().unwrap_or((0.0, 0.0))
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LandlordConfig {
     #[serde(default)]
@@ -126,7 +83,6 @@ pub struct Landlord {
     negcredits: u32,
     capacitymiss: u32,
     cont_manager: Arc<ContainerManager>,
-    benchmarks: FunctionBenchmarks,
 }
 
 impl Landlord {
@@ -165,9 +121,6 @@ impl Landlord {
                 negcredits: 0,
                 capacitymiss: 0,
                 cont_manager,
-                benchmarks: FunctionBenchmarks::load(
-                    "/Users/akshaykishan/PycharmProjects/iluvatar-faas/src/Ilúvatar/iluvatar_worker_library/src/resources/worker_function_benchmarks.json"
-                ),
             }),
         }
     }
@@ -418,10 +371,9 @@ impl Landlord {
         let iat_fqdn = self.cmap.get_avg(&reg.fqdn, Chars::IAT) as f32;
         let num_running = self.gpu_queue.queue_len() as f32;
     
-        // ── Benchmark table lookup (mirrors add_benchmark_features in Python) ─
-        let (gpu_warm_f64, gpu_cold_f64) = self.benchmarks.get(&reg.fqdn);
-        let gpu_warm = gpu_warm_f64 as f32;
-        let gpu_cold = gpu_cold_f64 as f32;
+        // ── Benchmark lookup from Chars map
+        let gpu_warm = self.cmap.get_avg(&reg.fqdn, Chars::GpuWarmTime) as f32;
+        let gpu_cold = self.cmap.get_avg(&reg.fqdn, Chars::GpuColdTime) as f32;
 
         let is_cold_start: f32 = if matches!(physical_state, ContainerState::Cold) { 1.0 } else { 0.0 };
 
