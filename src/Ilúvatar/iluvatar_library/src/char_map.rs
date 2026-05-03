@@ -1,5 +1,6 @@
 use crate::clock::now;
 use crate::linear_reg::LinearReg;
+use crate::rf_model::RfModel;
 use crate::transaction::TransactionId;
 use crate::types::{Compute, ResourceTimings};
 use dashmap::DashMap;
@@ -84,6 +85,17 @@ pub trait CharMap<T: num_traits::AsPrimitive<usize> + Max> {
     fn predict_gpu_load_est(&self, _x: f64) -> f64;
     /// Returns [-1.0] if insufficient data exists for interpolation.
     fn func_predict_gpu_load_est(&self, _fqdn: &str, _x: f64) -> f64;
+
+    fn get_rf_prediction(
+        &self,
+        _target_queue_len: f32,
+        _others_len_queue: f32,
+        _iat_fqdn: f32,
+        _num_running_funcs: f32,
+        _gpu_warm_results_sec: f32,
+        _gpu_cold_results_sec: f32,
+        _is_cold_start: f32
+    ) -> Option<f64> { None }
 }
 
 pub struct IatTracker {
@@ -247,6 +259,22 @@ impl<T: Max + num_traits::AsPrimitive<usize>> CharMap<T> for CharMapRO<T> {
     fn func_predict_gpu_load_est(&self, fqdn: &str, x: f64) -> f64 {
         self.inner.func_predict_gpu_load_est(fqdn, x)
     }
+
+    fn get_rf_prediction(
+        &self,
+        target_queue_len: f32,
+        others_len_queue: f32,
+        iat_fqdn: f32,
+        num_running_funcs: f32,
+        gpu_warm_results_sec: f32,
+        gpu_cold_results_sec: f32,
+        is_cold_start: f32
+    ) -> Option<f64> {
+        self.inner.get_rf_prediction(
+            target_queue_len, others_len_queue, iat_fqdn, num_running_funcs,
+            gpu_warm_results_sec, gpu_cold_results_sec, is_cold_start
+        )
+    }
 }
 
 #[inline(always)]
@@ -276,6 +304,7 @@ pub struct CharMapRW<const T: usize> {
     data: DashMap<String, Box<[f64]>>,
     gpu_load_lin_reg: RwLock<LinearReg>,
     func_gpu_load_lin_reg: DashMap<String, LinearReg>,
+    rf_model: Option<Arc<RfModel>>,
 }
 impl<T: Max + num_traits::AsPrimitive<usize>, const S: usize> CharMap<T> for CharMapRW<{ S }> {
     fn update(&self, fqdn: &str, key: T, value: f64) {
@@ -427,6 +456,22 @@ impl<T: Max + num_traits::AsPrimitive<usize>, const S: usize> CharMap<T> for Cha
             Some(lr) => lr.value().predict(x),
         }
     }
+
+    fn get_rf_prediction(
+        &self,
+        target_queue_len: f32,
+        others_len_queue: f32,
+        iat_fqdn: f32,
+        num_running_funcs: f32,
+        gpu_warm_results_sec: f32,
+        gpu_cold_results_sec: f32,
+        is_cold_start: f32
+    ) -> Option<f64> {
+        self.rf_model.as_ref()?.predict(
+            target_queue_len, others_len_queue, iat_fqdn, num_running_funcs,
+            gpu_warm_results_sec, gpu_cold_results_sec, is_cold_start
+        )
+    }
 }
 
 impl<const S: usize> CharMapRW<S> {
@@ -435,6 +480,7 @@ impl<const S: usize> CharMapRW<S> {
             data: DashMap::new(),
             gpu_load_lin_reg: RwLock::new(LinearReg::new()),
             func_gpu_load_lin_reg: DashMap::new(),
+            rf_model: RfModel::new("/Users/akshaykishan/PycharmProjects/iluvatar-faas/src/Ilúvatar/iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx").ok(),
         })
     }
 }

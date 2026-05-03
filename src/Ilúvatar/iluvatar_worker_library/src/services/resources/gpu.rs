@@ -13,6 +13,7 @@ use iluvatar_library::{
     utils::{execute_cmd_checked, execute_cmd_checked_async, missing_or_zero_default},
     ToAny,
 };
+#[allow(unused_imports)]
 use nvml_wrapper::{error::NvmlError, Nvml};
 use parking_lot::{RwLock, RwLockReadGuard};
 use std::fmt::Display;
@@ -1017,7 +1018,6 @@ impl GpuResourceTracker {
         Ok(ret)
     }
 
-    #[cfg(target_os = "linux")]
     #[tracing::instrument(level = "debug", skip_all)]
     async fn nvml_gpu_utilization(&self, nvml: &Nvml, _tid: &TransactionId) -> Result<Vec<GpuStatus>, NvmlError> {
         let is_empty = (*self.status_info.read()).is_empty();

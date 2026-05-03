@@ -2,7 +2,6 @@ use crate::services::containers::containermanager::ContainerManager;
 use crate::services::containers::structs::ContainerState;
 use crate::services::invocation::dispatching::queueing_dispatcher::DispatchPolicy;
 use crate::services::invocation::dispatching::{EnqueueingPolicy, QueueMap};
-use crate::services::invocation::dispatching::test_rf_model::RfModel;
 use crate::services::invocation::queueing::DeviceQueue;
 use crate::services::registration::RegisteredFunction;
 use crate::worker_api::config::InvocationConfig;
@@ -112,8 +111,6 @@ pub struct Landlord {
     negcredits: u32,
     capacitymiss: u32,
     cont_manager: Arc<ContainerManager>,
-    /// RF model for ML-based gpu_est_total prediction.
-    rf_model: Option<Arc<RfModel>>,
     /// Static benchmark table: base_function -> (warm_exec_sec, cold_exec_sec)
     benchmarks: FunctionBenchmarks,
 }
@@ -154,9 +151,6 @@ impl Landlord {
                 negcredits: 0,
                 capacitymiss: 0,
                 cont_manager,
-                rf_model: RfModel::new(
-                    "/Users/akshaykishan/PycharmProjects/iluvatar-faas/src/Ilúvatar/iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx"
-                ).ok(),
                 benchmarks: FunctionBenchmarks::load(
                     "/Users/akshaykishan/PycharmProjects/iluvatar-faas/src/Ilúvatar/iluvatar_worker_library/src/resources/worker_function_benchmarks.json"
                 ),
@@ -408,15 +402,13 @@ impl Landlord {
         let epsilon  = 0.05;
         let fallback_gpu_est_total = gpu_est * (1.0 + epsilon * n_active);
 
-        let gpu_est_total = match &self.rf_model {
+        let gpu_est_total = match self.cmap.get_rf_prediction(
+            target_queue_len, others_len_queue,
+            iat_fqdn, num_running,
+            gpu_warm, gpu_cold, is_cold_start,
+        ) {
             None => fallback_gpu_est_total,
-            Some(model) => model
-                .predict(
-                    target_queue_len, others_len_queue,
-                    iat_fqdn, num_running,
-                    gpu_warm, gpu_cold, is_cold_start,
-                )
-                .unwrap_or(fallback_gpu_est_total),
+            Some(pred) => pred,
         };
 
         let cpu_exec = self.cmap.get_avg(&reg.fqdn, Chars::CpuExecTime);

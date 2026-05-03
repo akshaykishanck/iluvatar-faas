@@ -10,6 +10,7 @@ pub mod utils;
 #[macro_use]
 pub mod macros;
 pub mod char_map;
+pub mod rf_model;
 pub mod clock;
 pub mod config;
 pub mod continuation;
