@@ -96,7 +96,7 @@ mod tests {
     use super::*;
 
     const MODEL_PATH: &str =
-        "/Users/akshaykishan/PycharmProjects/iluvatar-faas/src/Ilúvatar/iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx";
+        concat!(env!("CARGO_MANIFEST_DIR"), "/../iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx");
 
     fn run_and_print(model: &Arc<RfModel>, label: &str,
         tq: f32, oq: f32, iat_f: f32, running: f32, warm: f32, cold: f32, cold_start: f32)

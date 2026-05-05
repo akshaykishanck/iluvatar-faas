@@ -6,7 +6,7 @@ use std::sync::Arc;
 pub mod epsilon_greedy;
 pub mod greedy_weight;
 pub mod landlord;
-pub mod landlord_ml;
+
 pub mod popular;
 pub mod queueing_dispatcher;
 pub mod weighted_random;
