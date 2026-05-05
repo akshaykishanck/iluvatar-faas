@@ -369,7 +369,7 @@ impl Landlord {
         };
 
         let iat_fqdn = self.cmap.get_avg(&reg.fqdn, Chars::IAT) as f32;
-        let num_running = self.gpu_queue.queue_len() as f32;
+        let num_running = self.gpu_active_flows() as f32;
     
         // ── Benchmark lookup from Chars map
         let gpu_warm = self.cmap.get_avg(&reg.fqdn, Chars::GpuWarmTime) as f32;
@@ -382,14 +382,30 @@ impl Landlord {
         let epsilon = 0.05;
         let fallback_gpu_est_total = adjusted_gpu_est * (1.0 + epsilon * n_active);
 
-        let gpu_est_total = match self.cmap.get_rf_prediction(
+        let rf_prediction = self.cmap.get_rf_prediction(
             target_queue_len, others_len_queue,
             iat_fqdn, num_running,
             gpu_warm, gpu_cold, is_cold_start,
-        ) {
+        );
+        let gpu_est_total = match rf_prediction {
             None => fallback_gpu_est_total,
             Some(pred) => pred,
         };
+
+        info!(
+            tid = tid,
+            fqdn = reg.fqdn,
+            target_queue_len = target_queue_len,
+            others_len_queue = others_len_queue,
+            iat_fqdn = iat_fqdn,
+            num_running = num_running,
+            gpu_warm = gpu_warm,
+            gpu_cold = gpu_cold,
+            is_cold_start = is_cold_start,
+            rf_prediction = ?rf_prediction,
+            fallback_prediction = fallback_gpu_est_total,
+            "RF Model Latency Prediction Log"
+        );
 
         let cpu_exec = self.cmap.get_avg(&reg.fqdn, Chars::CpuExecTime);
         let cpu_est_total = f64::max(cpu_est, cpu_exec);
