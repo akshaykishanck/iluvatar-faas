@@ -38,6 +38,13 @@ impl RfModel {
         Ok(Arc::new(Self { session: Mutex::new(session) }))
     }
 
+    /// Load the ONNX model from memory bytes.
+    pub fn from_bytes(model_bytes: &[u8]) -> Result<Arc<Self>> {
+        let session = Session::builder()?.commit_from_memory(model_bytes)?;
+        info!("RF model loaded from memory bytes");
+        Ok(Arc::new(Self { session: Mutex::new(session) }))
+    }
+
     /// Run inference and return predicted e2e GPU latency in **seconds**.
     ///
     /// Returns `None` if inference fails so callers can fall back gracefully.
@@ -95,8 +102,10 @@ impl RfModel {
 mod tests {
     use super::*;
 
-    const MODEL_PATH: &str =
-        concat!(env!("CARGO_MANIFEST_DIR"), "/../iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx");
+    const MODEL_PATH: &str = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx"
+    );
 
     fn run_and_print(model: &Arc<RfModel>, label: &str,
         tq: f32, oq: f32, iat_f: f32, running: f32, warm: f32, cold: f32, cold_start: f32)
@@ -123,8 +132,7 @@ mod tests {
 
         run_and_print(&model, "SCENARIO 3 — heavy contention",
             12.0, 35.0, 0.1, 20.0, 2.1, 3.8, 0.0);
-        
+
         println!("All inference tests completed.");
     }
 }
-

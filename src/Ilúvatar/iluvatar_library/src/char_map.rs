@@ -480,7 +480,7 @@ impl<const S: usize> CharMapRW<S> {
             data: DashMap::new(),
             gpu_load_lin_reg: RwLock::new(LinearReg::new()),
             func_gpu_load_lin_reg: DashMap::new(),
-            rf_model: RfModel::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx")).ok(),
+            rf_model: RfModel::from_bytes(include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"),"/../iluvatar_worker_library/src/resources/iluvatar_rf_estimator_7_features.onnx"))).ok(),
         })
     }
 }

@@ -24,6 +24,9 @@ repository = "https://github.com/COS-IN/iluvatar-faas"
 categories = ["science", "simulation"]
 description = "A fast, modular, extensible FaaS control plane designed for enabling serverless research."
 
+[workspace.dependencies]
+ort = { version = "2.0.0-rc.11", features= ["load-dynamic"] }
+
 [profile.dev]
 opt-level=0
 debug=2

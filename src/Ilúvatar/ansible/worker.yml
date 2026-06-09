@@ -49,6 +49,14 @@
       remote_src: "{{__remote_bin_src}}"
     become: yes
 
+  - name: copy libonnxruntime.so
+    ansible.builtin.copy:
+      src: "{{__bin_src}}/libonnxruntime.so"
+      dest: "{{bin_dir}}/libonnxruntime.so"
+      mode: "preserve"
+      remote_src: "{{__remote_bin_src}}"
+    become: yes
+
   - name: copy worker config
     ansible.builtin.copy:
       src: "{{__bin_src}}/{{worker.config_name}}"

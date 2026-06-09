@@ -10,10 +10,10 @@ TARGET :=
 else
 TARGET :=--target $(TARGET_PLAT)
 endif
-RUST_C?=cross
+RUST_C?=cargo
 SHARED_FLAGS=$(TARGET) --jobs $(NPROCS)
 BIN_FLAGS=--lib --bins $(SHARED_FLAGS)
-CARGO_ARGS?=""
+CARGO_ARGS?=
 
 default: debug
 
@@ -28,9 +28,13 @@ check:
 release:
 	@echo "Building release"
 	@RUSTFLAGS="$(RUST_FLAGS)" $(RUST_C) build $(BIN_FLAGS) --profile=release $(CARGO_ARGS)
+	@mkdir -p target/$(TARGET_PLAT)/release/
+	@cp -f /extra/Kish/Exp_Script/onnxruntime-linux-x64-1.23.0/lib/libonnxruntime.so* target/$(TARGET_PLAT)/release/
 relwdebug:
 	@echo "Building release w/debug symbols"
 	@RUSTFLAGS="$(RUST_FLAGS)" $(RUST_C) build $(BIN_FLAGS) --profile=relwdebug $(CARGO_ARGS)
+	@mkdir -p target/$(TARGET_PLAT)/release/
+	@cp -f /extra/Kish/Exp_Script/onnxruntime-linux-x64-1.23.0/lib/libonnxruntime.so* target/$(TARGET_PLAT)/release/
 
 tiny:
 # https://github.com/johnthagen/min-sized-rust
@@ -45,12 +49,18 @@ tiny:
 debug:
 	@echo "Building debug"
 	@RUSTFLAGS="$(RUST_FLAGS)" $(RUST_C) build --profile=dev $(BIN_FLAGS) $(CARGO_ARGS)
+	@mkdir -p target/$(TARGET_PLAT)/debug/
+	@cp -f /extra/Kish/Exp_Script/onnxruntime-linux-x64-1.23.0/lib/libonnxruntime.so* target/$(TARGET_PLAT)/debug/
 spans:
 	@echo "Building full_spans"
 	@RUSTFLAGS="$(RUST_FLAGS)" $(RUST_C) build --features full_spans $(BIN_FLAGS) --profile=spans $(CARGO_ARGS)
+	@mkdir -p target/$(TARGET_PLAT)/release/
+	@cp -f /extra/Kish/Exp_Script/onnxruntime-linux-x64-1.23.0/lib/libonnxruntime.so* target/$(TARGET_PLAT)/release/
 spansd:
 	@echo "Building debug full_spans"
 	@RUSTFLAGS="$(RUST_FLAGS)" $(RUST_C) build --features full_spans $(BIN_FLAGS) --profile=spansd $(CARGO_ARGS)
+	@mkdir -p target/$(TARGET_PLAT)/debug/
+	@cp -f /extra/Kish/Exp_Script/onnxruntime-linux-x64-1.23.0/lib/libonnxruntime.so* target/$(TARGET_PLAT)/debug/
 flame:
 	@echo "TODO: implement running flame"
 test:

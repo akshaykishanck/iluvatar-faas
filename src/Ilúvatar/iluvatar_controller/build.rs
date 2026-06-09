@@ -17,7 +17,13 @@ fn get_output_path() -> PathBuf {
 
 fn copy_file(infile: &Path) -> Result<(), Box<dyn Error>> {
     let output_path = get_output_path().join(infile.file_name().unwrap());
-    let infile = Path::new("src").join(infile);
+
+    // 1. Get the absolute path to the iluvatar_worker folder
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")?;
+
+    // 2. Build the correct path pointing to iluvatar_worker/src/<your_file>
+    let infile = Path::new(&manifest_dir).join("src").join(infile);
+
     std::fs::copy(infile, output_path).unwrap();
     Ok(())
 }
@@ -26,3 +32,4 @@ fn main() -> Result<(), Box<dyn Error>> {
     copy_file(Path::new("controller.json")).unwrap();
     Ok(())
 }
+
