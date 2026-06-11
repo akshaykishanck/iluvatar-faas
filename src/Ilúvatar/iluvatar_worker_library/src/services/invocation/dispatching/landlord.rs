@@ -231,6 +231,14 @@ impl Landlord {
         }
     }
 
+    /// Real-time count of invocations currently executing on the GPU.
+    fn gpu_inflight_count(&self) -> u32 {
+        match self.gpu_queue.expose_mqfq() {
+            None => 0,
+            Some(mqfq) => mqfq.iter().map(|q| q.in_flight.max(0) as u32).sum(),
+        }
+    }
+
     fn charge_rents(
         &mut self,
         reg: &Arc<RegisteredFunction>,
@@ -368,8 +376,9 @@ impl Landlord {
             }
         };
 
-        let iat_fqdn = self.cmap.get_avg(&reg.fqdn, Chars::IAT) as f32;
-        let num_running = self.gpu_active_flows() as f32;
+        let iat_fqdn = self.cmap.get_latest(&reg.fqdn, Chars::IAT) as f32;
+        // Only count invocations actively executing on the GPU (in_flight), not queued ones.
+        let num_running = self.gpu_inflight_count() as f32;
     
         // ── Benchmark lookup from Chars map
         let gpu_warm = self.cmap.get_avg(&reg.fqdn, Chars::GpuWarmTime) as f32;
