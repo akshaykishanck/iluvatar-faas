@@ -385,6 +385,14 @@ impl Landlord {
         let gpu_cold = self.cmap.get_avg(&reg.fqdn, Chars::GpuColdTime) as f32;
 
         let is_cold_start: f32 = if matches!(physical_state, ContainerState::Cold) { 1.0 } else { 0.0 };
+        let avg_mem = self.cmap.get_avg(&reg.fqdn, Chars::GpuMemoryUsage);
+
+        let sum_memory_running = match self.gpu_queue.expose_mqfq() {
+            None => 0.0_f32,
+            Some(mqfq) => mqfq.iter()
+                .map(|entry| entry.value().in_flight as f64 * self.cmap.get_avg(entry.key(), Chars::GpuMemoryUsage))
+                .sum::<f64>() as f32,
+        };
 
         // Try ML prediction; fall back to the original heuristic if model unavailable.
         let n_active = self.gpu_active_flows() as f64;
@@ -411,6 +419,8 @@ impl Landlord {
             gpu_warm = gpu_warm,
             gpu_cold = gpu_cold,
             is_cold_start = is_cold_start,
+            avg_mem = avg_mem,
+            sum_memory_running = sum_memory_running,
             rf_prediction = ?rf_prediction,
             fallback_prediction = fallback_gpu_est_total,
             "RF Model Latency Prediction Log"
