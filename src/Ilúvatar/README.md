@@ -27,7 +27,7 @@ Or run more advanced load scenarios using the [load generation documentation](do
 ## Develop & Extend
 
 Being a platform for research requires it to be easily extendible by future researchers.
-Check out the [development documentation](./docs/DEV.md) for a breakdown of the codebase and how to implement features.
+Check out the [development documentation](./docs/DEV.md) for a breakdown of the codebase and how to implement features, and the [Latency Prediction documentation](./docs/LATENCY_PREDICTION.md).
 
 ## Why 'Ilúvatar'?
 

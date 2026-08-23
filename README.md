@@ -71,6 +71,7 @@ See Ilúvatar in action for research [right here](./src/Ilúvatar/docs/RESEARCH.
 
 Ilúvatar supports a large variety of customization in configuration and setup, and methods of load generation and experimentation.
 It is easy to create custom functions that run new Python programs, [information is in this document](./src/Ilúvatar/docs/FUNCTIONS.md#preparing-code-to-be-functions).
+For ML-based latency prediction and ONNX Random Forest model integration in scheduling policies, see [Latency Prediction Documentation](./src/Ilúvatar/docs/LATENCY_PREDICTION.md).
 Detailed documentation can be found [closer to the code](./src/Ilúvatar/README.md).
 
 If you have questions, want help working with Ilúvatar, or anything else, we have a [Discord server](https://discord.gg/r4CZ7bZhmJ).

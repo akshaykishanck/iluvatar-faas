@@ -13,6 +13,10 @@ For starters on how to extend or modify Ilúvatar, see the documentation on [dev
 
 Check out [here](./ANSIBLE.md) for how to use Ansible to simplify deployment of Ilúvatar to one or more nodes.
 
+## Machine Learning & Latency Prediction
+
+Check out [here](./LATENCY_PREDICTION.md) for details on how the ONNX Random Forest model is exported, embedded, integrated into `CharMap`, and used in the `Landlord` dispatch policy.
+
 ## Flame graphs
 
 An extension of the logging setup can track function execution times and convert them into flame graphs.
